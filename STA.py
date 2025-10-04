@@ -26,13 +26,7 @@ load_dotenv(dotenv_path=str(_project_dir / 'AAPI.env'))
 # Also try generic .env without overriding existing env vars
 load_dotenv()
 OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
-try:
-    # Use Streamlit secrets in deployed environments
-    OPENROUTER_API_KEY = st.secrets.get("OPENROUTER_API_KEY") if hasattr(st, "secrets") else None
-except Exception:
-    OPENROUTER_API_KEY = None
-if not OPENROUTER_API_KEY:
-    OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
 client = None
 if OPENROUTER_API_KEY:
     try:
