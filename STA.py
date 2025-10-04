@@ -20,7 +20,7 @@ Order of precedence:
 2) Environment variable loaded via dotenv (AAPI.env)
 """
 load_dotenv('AAPI.env')
-OPENROUTER_API_KEY = None
+OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
 try:
     # Use Streamlit secrets in deployed environments
     OPENROUTER_API_KEY = st.secrets.get("OPENROUTER_API_KEY") if hasattr(st, "secrets") else None
