@@ -1,42 +1,105 @@
-# streamlit_app.py
-import io, json, re, base64
-import streamlit as st
-import pandas as pd
-from PIL import Image, ImageDraw, ImageEnhance, ImageOps, ImageFilter
-from datetime import datetime
-import tempfile, os
-from openai import OpenAI
-from dotenv import load_dotenv
+# # streamlit_app.py
+# import io, json, re, base64
+# import streamlit as st
+# import pandas as pd
+# from PIL import Image, ImageDraw, ImageEnhance, ImageOps, ImageFilter
+# from datetime import datetime
+# import tempfile, os
+# from openai import OpenAI
+# from dotenv import load_dotenv
+# from pathlib import Path
+
+# # === 引擎設定 ===
+# USE_KERAS_OCR = False
+# USE_PADDLE = False
+# USE_TESSERACT = False
+# USE_AI_API = True
+
+# """Client initialization with robust key loading.
+# Order of precedence:
+# 1) Streamlit secrets (st.secrets["OPENROUTER_API_KEY"]) if available
+# 2) Environment variable loaded via dotenv (AAPI.env or .env)
+# """
+# # Load env files relative to this script for reliability
+# _project_dir = Path(__file__).resolve().parent
+# load_dotenv(dotenv_path=str(_project_dir / 'AAPI.env'))
+# # Also try generic .env without overriding existing env vars
+# load_dotenv()
+# OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
+
+# client = None
+# if OPENROUTER_API_KEY:
+#     try:
+#         default_headers = {
+#             "HTTP-Referer": os.getenv("APP_URL", "http://localhost"),
+#             "X-Title": "StapleAI MVP",
+#         }
+#         client = OpenAI(api_key=OPENROUTER_API_KEY, base_url="https://openrouter.ai/api/v1", default_headers=default_headers)
+#     except Exception:
+#         client = None
+
+import os
 from pathlib import Path
+import streamlit as st
+from dotenv import load_dotenv
+from openai import OpenAI  # pip install openai
 
-# === 引擎設定 ===
-USE_KERAS_OCR = False
-USE_PADDLE = False
-USE_TESSERACT = False
-USE_AI_API = True
-
-"""Client initialization with robust key loading.
-Order of precedence:
-1) Streamlit secrets (st.secrets["OPENROUTER_API_KEY"]) if available
-2) Environment variable loaded via dotenv (AAPI.env or .env)
-"""
-# Load env files relative to this script for reliability
+# --- load .env files for local/dev ---
 _project_dir = Path(__file__).resolve().parent
-load_dotenv(dotenv_path=str(_project_dir / 'AAPI.env'))
-# Also try generic .env without overriding existing env vars
-load_dotenv()
-OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
+# 明確指定 AAPI.env，再載入預設 .env（不覆寫既有環境變數）
+load_dotenv(dotenv_path=_project_dir / "AAPI.env", override=False)
+load_dotenv(override=False)
+
+def get_secret(key: str) -> str | None:
+    # 1) Streamlit secrets (root)
+    try:
+        if key in st.secrets:
+            return st.secrets[key]
+    except Exception:
+        pass
+
+    # 2) Streamlit secrets ([general] section)
+    try:
+        if "general" in st.secrets and key in st.secrets["general"]:
+            return st.secrets["general"][key]
+    except Exception:
+        pass
+
+    # 3) OS env
+    val = os.getenv(key)
+    if val:
+        return val
+
+    # 4) 已由上面的 load_dotenv 載入 .env / AAPI.env
+    #    （其實 os.getenv 也會拿到）
+    return None
+
+OPENROUTER_API_KEY = get_secret("OPENROUTER_API_KEY")
+
+# （可選）安全偵錯：只顯示是否讀到，不顯示內容
+st.caption("🔐 OPENROUTER_API_KEY loaded: " + ("✅" if bool(OPENROUTER_API_KEY) else "❌"))
+
+# 可選：設定 APP_URL（避免 Referer 檢查問題）
+APP_URL = get_secret("APP_URL") or "http://localhost"
 
 client = None
 if OPENROUTER_API_KEY:
     try:
         default_headers = {
-            "HTTP-Referer": os.getenv("APP_URL", "http://localhost"),
+            "HTTP-Referer": APP_URL,      # 若部署在 Streamlit Cloud，建議設你的 App URL
             "X-Title": "StapleAI MVP",
         }
-        client = OpenAI(api_key=OPENROUTER_API_KEY, base_url="https://openrouter.ai/api/v1", default_headers=default_headers)
-    except Exception:
+        client = OpenAI(
+            api_key=OPENROUTER_API_KEY,
+            base_url="https://openrouter.ai/api/v1",
+            default_headers=default_headers
+        )
+    except Exception as e:
+        st.error(f"Init OpenRouter client failed: {e}")
         client = None
+else:
+    st.error("OPENROUTER_API_KEY not found. Check Streamlit secrets / env / .env files.")
+
 
 import numpy as np
 
