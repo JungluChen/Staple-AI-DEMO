@@ -7,6 +7,7 @@ from datetime import datetime
 import tempfile, os
 from openai import OpenAI
 from dotenv import load_dotenv
+from pathlib import Path
 
 # === 引擎設定 ===
 USE_KERAS_OCR = False
@@ -17,9 +18,13 @@ USE_AI_API = True
 """Client initialization with robust key loading.
 Order of precedence:
 1) Streamlit secrets (st.secrets["OPENROUTER_API_KEY"]) if available
-2) Environment variable loaded via dotenv (AAPI.env)
+2) Environment variable loaded via dotenv (AAPI.env or .env)
 """
-load_dotenv('AAPI.env')
+# Load env files relative to this script for reliability
+_project_dir = Path(__file__).resolve().parent
+load_dotenv(dotenv_path=str(_project_dir / 'AAPI.env'))
+# Also try generic .env without overriding existing env vars
+load_dotenv()
 OPENROUTER_API_KEY = st.secrets["OPENROUTER_API_KEY"]
 try:
     # Use Streamlit secrets in deployed environments
@@ -534,16 +539,31 @@ st.markdown(r"""
 with st.sidebar:
     st.subheader("Controls")
     uploaded = st.file_uploader("Upload PNG/JPG", type=["png","jpg","jpeg"])
-    # workspace_path = st.text_input(
-    #     "Image path",
-    #     value=r"Example.jpg"
-    # )
+    workspace_path = st.text_input(
+        "Image path",
+        value=r"Example.jpg"
+    )
     
     # conf_thr = st.slider("Low-confidence threshold", 0.0, 1.0, 0.5, 0.05, help="(unused in AI mode)")
+    ai_model = st.text_input("Model", value=os.getenv("AI_MODEL") or "mistralai/mistral-small-3.2-24b-instruct:free")
     run = st.button("Analyze Receipt")
     test = st.button("Test API")
     st.caption("Set OPENROUTER_API_KEY via AAPI.env or Streamlit secrets for deployment.")
-ai_model = "mistralai/mistral-small-3.2-24b-instruct:free"
+    # Show key detection status (no secret values revealed)
+    try:
+        key_in_secrets = hasattr(st, "secrets") and bool(st.secrets.get("OPENROUTER_API_KEY"))
+    except Exception:
+        key_in_secrets = False
+    key_in_env = bool(os.getenv("OPENROUTER_API_KEY"))
+    if key_in_secrets:
+        st.success("API key detected (secrets).")
+    elif key_in_env:
+        # If AAPI.env exists, hint that env likely comes from file
+        hint_file = (_project_dir / 'AAPI.env').exists()
+        st.info("API key detected (env{}).".format(" via AAPI.env" if hint_file else ""))
+    else:
+        st.warning("No API key detected.")
+# ai_model comes from sidebar input above
 # Session state for sharing results across tabs
  # Simple prototype: no session state needed
 
