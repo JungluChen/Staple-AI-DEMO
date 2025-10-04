@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Environments
+.env
+AAPI.env
+venv/
+.venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Streamlit local config (do NOT commit secrets)
+.streamlit/
+
+# Images & temp
+*.tmp
+*.log
