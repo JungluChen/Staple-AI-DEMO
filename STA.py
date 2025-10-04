@@ -10,10 +10,10 @@
 # from pathlib import Path
 
 # # === 引擎設定 ===
-# USE_KERAS_OCR = False
-# USE_PADDLE = False
-# USE_TESSERACT = False
-# USE_AI_API = True
+USE_KERAS_OCR = False
+USE_PADDLE = False
+USE_TESSERACT = False
+USE_AI_API = True
 
 # """Client initialization with robust key loading.
 # Order of precedence:
