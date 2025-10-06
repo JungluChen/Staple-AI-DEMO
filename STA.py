@@ -574,7 +574,7 @@ with st.sidebar:
     )
     
     # conf_thr = st.slider("Low-confidence threshold", 0.0, 1.0, 0.5, 0.05, help="(unused in AI mode)")
-    ai_model = st.text_input("Model", value=os.getenv("AI_MODEL") or "mistralai/mistral-small-3.2-24b-instruct:free")
+    ai_model = st.selectbox("Model", options=model_list, index=model_list.index(os.getenv("AI_MODEL")) if os.getenv("AI_MODEL") in model_list else 0)
     run = st.button("Analyze Receipt")
     test = st.button("Test API")
     st.caption("Set OPENROUTER_API_KEY via AAPI.env or Streamlit secrets for deployment.")
