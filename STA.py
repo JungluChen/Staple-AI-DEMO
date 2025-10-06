@@ -15,7 +15,7 @@ USE_PADDLE = False
 USE_TESSERACT = False
 USE_AI_API = True
 
-"""Client initialization from secrets/env as requested."""
+# """Client initialization from secrets/env as requested."""
 # --- load .env files for local/dev ---
 _project_dir = Path(__file__).resolve().parent
 # 明確指定 AAPI.env，再載入預設 .env（不覆寫既有環境變數）
@@ -46,7 +46,7 @@ def get_secret(key: str) -> str | None:
 OPENROUTER_API_KEY = get_secret("OPENROUTER_API_KEY")
 
 # （可選）安全偵錯：只顯示是否讀到，不顯示內容
-st.caption("🔐 OPENROUTER_API_KEY loaded: " + ("✅" if bool(OPENROUTER_API_KEY) else "❌"))
+# st.caption("🔐 OPENROUTER_API_KEY loaded: " + ("✅" if bool(OPENROUTER_API_KEY) else "❌"))
 
 # 可選：設定 APP_URL（避免 Referer 檢查問題）
 APP_URL = get_secret("APP_URL") or "http://localhost"
@@ -575,24 +575,24 @@ with st.sidebar:
     
     # conf_thr = st.slider("Low-confidence threshold", 0.0, 1.0, 0.5, 0.05, help="(unused in AI mode)")
     ai_model = random.choice(model_list)
-    print(ai_model)
+    # print(ai_model)
     run = st.button("Analyze Receipt")
-    test = st.button("Test API")
-    st.caption("Set OPENROUTER_API_KEY via AAPI.env or Streamlit secrets for deployment.")
+    # test = st.button("Test API")
+    # st.caption("Set OPENROUTER_API_KEY via AAPI.env or Streamlit secrets for deployment.")
     # Show key detection status (no secret values revealed)
-    try:
-        key_in_secrets = hasattr(st, "secrets") and bool(st.secrets.get("OPENROUTER_API_KEY"))
-    except Exception:
-        key_in_secrets = False
-    key_in_env = bool(os.getenv("OPENROUTER_API_KEY"))
-    if key_in_secrets:
-        st.success("API key detected (secrets).")
-    elif key_in_env:
-        # If AAPI.env exists, hint that env likely comes from file
-        hint_file = (_project_dir / 'AAPI.env').exists()
-        st.info("API key detected (env{}).".format(" via AAPI.env" if hint_file else ""))
-    else:
-        st.warning("No API key detected.")
+    # try:
+    #     key_in_secrets = hasattr(st, "secrets") and bool(st.secrets.get("OPENROUTER_API_KEY"))
+    # except Exception:
+    #     key_in_secrets = False
+    # key_in_env = bool(os.getenv("OPENROUTER_API_KEY"))
+    # if key_in_secrets:
+    #     st.success("API key detected (secrets).")
+    # elif key_in_env:
+    #     # If AAPI.env exists, hint that env likely comes from file
+    #     hint_file = (_project_dir / 'AAPI.env').exists()
+    #     st.info("API key detected (env{}).".format(" via AAPI.env" if hint_file else ""))
+    # else:
+    #     st.warning("No API key detected.")
 # ai_model comes from sidebar input above
 # Session state for sharing results across tabs
  # Simple prototype: no session state needed
