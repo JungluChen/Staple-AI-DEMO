@@ -97,12 +97,13 @@ def to_float(s):
         return float(str(s).replace(",", "").strip())
     except:
         return s
-
+import random
 def load_image(file):
     if file.type == "application/pdf":
         # 簡化：使用 pdf2image 轉第一頁（可擴充批次頁）
         try:
             from pdf2image import convert_from_bytes
+
         except ImportError:
             st.info("pdf2image is not installed; PDF support is disabled.")
             return None
@@ -157,6 +158,8 @@ def encode_uploaded_file_to_base64(file):
     except Exception:
         return None
 
+model_list = ["mistralai/mistral-small-3.2-24b-instruct:free","moonshotai/kimi-vl-a3b-thinking:free","meta-llama/llama-4-maverick:free","meta-llama/llama-4-scout:free","qwen/qwen2.5-vl-32b-instruct:free","mistralai/mistral-small-3.1-24b-instruct:free","google/gemma-3-4b-it:free","google/gemma-3-12b-it:free","google/gemma-3-27b-it:free","qwen/qwen2.5-vl-72b-instruct:free","google/gemini-2.0-flash-exp:free"]
+
 def call_ai_with_b64(b64: str, model: str | None = None):
     """Shared AI call using base64 image string and configured model."""
     if client is None:
@@ -169,7 +172,8 @@ def call_ai_with_b64(b64: str, model: str | None = None):
         "[{\"name\":\"Item A\",\"qty\":2,\"unit_price\":3.5,\"total_price\":7.0}]"
     )
     try:
-        model_name = model or os.getenv("AI_MODEL") or "mistralai/mistral-small-3.2-24b-instruct:free"
+        # 如果未指定模型，则随机从 model_list 中选择一个
+        model_name = model or os.getenv("AI_MODEL") or random.choice(model_list)
         resp = client.chat.completions.create(
             model=model_name,
             messages=[
